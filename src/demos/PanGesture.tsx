@@ -1,8 +1,9 @@
 import * as React from "react"
 import {StyleSheet, View} from "react-native"
+import {PanGestureHandler} from "react-native-gesture-handler";
+import {clamp, withBouncing} from "react-native-redash";
 
 import {Card, CARD_WIDTH, Cards, CARD_HEIGHT} from "../components";
-import {PanGestureHandler} from "react-native-gesture-handler";
 import Animated, {
     runOnJS,
     useAnimatedGestureHandler,
@@ -10,7 +11,6 @@ import Animated, {
     useSharedValue,
     withDecay
 } from "react-native-reanimated";
-import {clamp} from "react-native-redash";
 
 interface iProps {
     height: number;
@@ -25,7 +25,7 @@ export const PanGestureComponent: React.FC<iProps> = ({height, width}) => {
     const translateY = useSharedValue(0);
 
     const onGestureEvent = useAnimatedGestureHandler({
-        onStart: (event, ctx) => {
+        onStart: (_, ctx) => {
             // @ts-ignore
             ctx.offsetX = translateX.value;
             // @ts-ignore
@@ -37,13 +37,21 @@ export const PanGestureComponent: React.FC<iProps> = ({height, width}) => {
             // @ts-ignore
             translateY.value = clamp(ctx.offsetY + event.translationY, 0, boundY);
         },
-        onEnd: (event) => {
-            translateX.value = withDecay({
-                velocity: event.velocityX, clamp: [0, boundX]
-            });
-            translateY.value = withDecay({
-                velocity: event.velocityY, clamp: [0, boundY]
-            })
+        onEnd: ({velocityX, velocityY}) => {
+            translateX.value = withBouncing(
+                withDecay({
+                    velocity: velocityX,
+                }),
+                0,
+                boundX
+            );
+            translateY.value = withBouncing(
+                withDecay({
+                    velocity: velocityY
+                }),
+                0,
+                boundY
+            )
         }
     })
 
