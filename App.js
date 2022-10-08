@@ -1,22 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import {StatusBar} from 'expo-status-bar';
+import {Dimensions, SafeAreaView, StyleSheet} from 'react-native';
 
-import {Worklets} from "./src/components/Worklets";
+import {Worklets} from "./src/demos/Worklets";
+import {PanGestureComponent} from "./src/demos/PanGesture";
+
+const height = Dimensions.get('window').height;
+const width = Dimensions.get('window').width;
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <Worklets />
-    </View>
-  );
+    return (
+        <SafeAreaView>
+            <StatusBar style="auto"/>
+            <PanGestureComponent height={height} width={width}/>
+            {/*<Worklets/>*/}
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
