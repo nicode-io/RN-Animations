@@ -24,7 +24,7 @@ export const Cursor = ({r, strokeWidth, theta}: CursorProps) => {
 
     const style = useAnimatedStyle(() => {
         const {x: translateX, y: translateY} = polar2Canvas({theta: theta.value, radius: r}, center);
-        
+
         return {
             transform: [
                 {translateX},
@@ -46,6 +46,7 @@ export const Cursor = ({r, strokeWidth, theta}: CursorProps) => {
                         borderWidth: 5,
                         backgroundColor: StyleGuide.palette.primary,
                     },
+                    style
                 ]}
             />
         </PanGestureHandler>
