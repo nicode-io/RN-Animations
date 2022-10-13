@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useDerivedValue, useSharedValue, withRepeat, withSpring, withTiming} from "react-native-reanimated";
 
 import {Button, cards, StyleGuide} from "../../components";
 import {AnimatedCard} from "./AnimatedCard";
-import {useDerivedValue, useSharedValue, withSpring, withTiming} from "react-native-reanimated";
-import {useSpring} from "react-native-redash";
-
 
 // Own implementations of Redash useSpring() and useTiming() hooks
 
@@ -42,7 +40,7 @@ export const Transitions: React.FC = () => {
     // 2) using UI thread (see 'reset' button doesn't change
     const toggled = useSharedValue(false);
     const transition = useDerivedValue(() => {
-        return withSpring(toggled.value);
+        return withRepeat(withSpring(toggled.value), 6, true);
     })
 
 
