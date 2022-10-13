@@ -18,15 +18,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "io.nicode.rnanimations"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      },
-      "package": "io.nicode.rnanimations"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
