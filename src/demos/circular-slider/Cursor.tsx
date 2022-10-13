@@ -1,40 +1,77 @@
 import * as React from "react";
-import {StyleSheet, View} from "react-native";
-
-import {StyleGuide} from "../../components";
+import {StyleSheet} from "react-native";
+import Animated, {
+    useAnimatedGestureHandler,
+    useAnimatedStyle,
+} from "react-native-reanimated";
+import type {PanGestureHandlerGestureEvent} from "react-native-gesture-handler";
 import {PanGestureHandler} from "react-native-gesture-handler";
-import Animated, {useAnimatedGestureHandler, useAnimatedStyle} from "react-native-reanimated";
-import {canvas2Polar, polar2Canvas} from "react-native-redash";
+import {canvas2Polar, polar2Canvas, clamp, polar2Cartesian, cartesian2Polar} from "react-native-redash";
+
 
 interface CursorProps {
     r: number;
     strokeWidth: number;
-    theta: any
+    theta: Animated.SharedValue<number>;
+    backgroundColor: Animated.SharedValue<string | number>;
 }
 
-export const Cursor = ({r, strokeWidth, theta}: CursorProps) => {
+export const Cursor = ({
+                           r,
+                           strokeWidth,
+                           theta,
+                           backgroundColor,
+                       }: CursorProps) => {
     const center = {x: r, y: r};
+    const THRESHOLD = 0.001;
 
-    const onGestureEvent = useAnimatedGestureHandler({
+    const onGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent,
+        {
+            offset: { x: number; y: number };
+        }>({
+        onStart: (_event, ctx) => {
+            ctx.offset = polar2Canvas(
+                {
+                    theta: theta.value,
+                    radius: r,
+                },
+                center
+            );
+        },
         onActive: (event, ctx) => {
-            const {translationX, translationY} = event;
-            theta.value = canvas2Polar({x: translationX, y: translationY}, center).theta;
-        }
-    })
+            const x = ctx.offset.x + event.translationX;
+            const y1 = ctx.offset.y + event.translationY;
+
+            // Clamp min/max values for slider in circle
+            let y: number;
+            if (x < r) {
+                y = y1;
+            } else if (theta.value < Math.PI) {
+                y = clamp(y1, 0, r - THRESHOLD);
+            } else {
+                y = clamp(y1, r, 2 * r);
+            }
+            const value = canvas2Polar({x, y}, center).theta;
+            theta.value = value > 0 ? value : 2 * Math.PI + value;
+        },
+    });
 
     const style = useAnimatedStyle(() => {
-        const {x: translateX, y: translateY} = polar2Canvas({theta: theta.value, radius: r}, center);
-
+        const translation = polar2Canvas(
+            {
+                theta: theta.value,
+                radius: r,
+            },
+            center
+        );
         return {
-            transform: [
-                {translateX},
-                {translateY}
-            ]
-        }
-    })
+            backgroundColor: backgroundColor.value,
+            transform: [{translateX: translation.x}, {translateY: translation.y}],
+        };
+    });
 
     return (
-        <PanGestureHandler {...{onGestureEvent}}>
+        <PanGestureHandler onGestureEvent={onGestureEvent}>
             <Animated.View
                 style={[
                     {
@@ -44,9 +81,8 @@ export const Cursor = ({r, strokeWidth, theta}: CursorProps) => {
                         borderRadius: strokeWidth / 2,
                         borderColor: "white",
                         borderWidth: 5,
-                        backgroundColor: StyleGuide.palette.primary,
                     },
-                    style
+                    style,
                 ]}
             />
         </PanGestureHandler>
